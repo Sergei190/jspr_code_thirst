@@ -13,7 +13,8 @@ public class Server {
         try (var serverSocket = new ServerSocket(SERVER_PORT)) {
             while (true) {
                 var socket = serverSocket.accept();
-                var thread = new Handler(socket);
+                var request = new Request("/server/path", 10, 5, queryParams);
+                var thread = new Handler(socket, request);
                 threadPool.submit(thread);
             }
         } catch (IOException ex) {

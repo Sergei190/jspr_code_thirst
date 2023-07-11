@@ -8,7 +8,9 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public class Handler implements Runnable {
@@ -33,8 +35,25 @@ public class Handler implements Runnable {
                     continue;
                 }
 
+                final var pathWithQuery = parts[1];
+                final var pathParts = pathWithQuery.split("\\?");
+                final var path = pathParts[0];
 
-                final var path = parts[1];
+                // Обработка параметров Query String
+                Map<String, String> queryParams = new HashMap<>();
+                if (pathParts.length > 1) {
+                    String queryString = pathParts[1];
+                    String[] paramPairs = queryString.split("&");
+                    for (String pair : paramPairs) {
+                        String[] keyValue = pair.split("=");
+                        if (keyValue.length == 2) {
+                            String key = keyValue[0];
+                            String value = keyValue[1];
+                            queryParams.put(key, value);
+                        }
+                    }
+                }
+
                 if (!validPaths.contains(path)) {
                     out.write((
                             "HTTP/1.1 404 Not Found\r\n" +
@@ -79,8 +98,6 @@ public class Handler implements Runnable {
                 Files.copy(filePath, out);
                 out.flush();
             }
-
-
         } catch (IOException ex) {
             System.out.println(ex.getMessage());
         }
